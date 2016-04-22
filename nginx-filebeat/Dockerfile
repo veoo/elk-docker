@@ -1,17 +1,16 @@
-# Dockerfile to illustrate how Filebeat can be used with nginx
-# Filebeat 1.0.1
+# Dockerfile to run Filebeat that listens on a tmp folder for logs
+# Filebeat 1.2.1
 
 # Build with:
-# docker build -t <repo-user>/filebeat-nginx-example .
+# docker build -t <repo-user>/filebeat .
 
 # Run with:
-# docker run -p 80:80 -it --link <elk-container-name>:elk \
-#     --name filebeat-nginx-example <repo-user>/filebeat-nginx-example
+# docker run -it --link <elk-container-name>:elk \
+# 	-v /tmp/filebeat_listener:/tmp/filebeat_listener <repo-user>/filebeat
 
-FROM nginx
-MAINTAINER Sebastien Pujadas http://pujadas.net
-ENV REFRESHED_AT 2015-11-28
-
+FROM debian:jessie
+# Based on: github.com/spujadas/elk-docker
+MAINTAINER Cesar Rodriguez (cesar0094)
 
 ###############################################################################
 #                                INSTALLATION
@@ -20,23 +19,17 @@ ENV REFRESHED_AT 2015-11-28
 ### install Filebeat
 
 RUN apt-get update -qq \
- && apt-get install -qqy curl \
+ && apt-get install -qqy curl ca-certificates \
  && apt-get clean
 
-RUN curl -L -O https://download.elastic.co/beats/filebeat/filebeat_1.0.1_amd64.deb \
- && dpkg -i filebeat_1.0.1_amd64.deb \
- && rm filebeat_1.0.1_amd64.deb
+RUN curl -L -O https://download.elastic.co/beats/filebeat/filebeat_1.2.1_amd64.deb \
+ && dpkg -i filebeat_1.2.1_amd64.deb \
+ && rm filebeat_1.2.1_amd64.deb
 
 
 ###############################################################################
 #                                CONFIGURATION
 ###############################################################################
-
-### tweak nginx image set-up
-
-# remove log symlinks
-RUN rm /var/log/nginx/access.log /var/log/nginx/error.log
-
 
 ### configure Filebeat
 
@@ -46,15 +39,6 @@ ADD filebeat.yml /etc/filebeat/filebeat.yml
 # CA cert
 RUN mkdir -p /etc/pki/tls/certs
 ADD logstash-beats.crt /etc/pki/tls/certs/logstash-beats.crt
-
-###############################################################################
-#                                    DATA
-###############################################################################
-
-### add dummy HTML file
-
-COPY html /usr/share/nginx/html
-
 
 ###############################################################################
 #                                    START

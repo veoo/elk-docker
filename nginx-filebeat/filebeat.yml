@@ -17,5 +17,5 @@ filebeat:
       document_type: syslog
     -
       paths:
-        - "/var/log/nginx/*.log"
-      document_type: nginx-access
+        - /tmp/filebeat_listener/*.log
+      input_type: log
