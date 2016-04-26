@@ -17,5 +17,5 @@ filebeat:
       document_type: syslog
     -
       paths:
-        - /tmp/filebeat_listener/*.log
+        - /var/log/filebeat_listener/*.log
       input_type: log
